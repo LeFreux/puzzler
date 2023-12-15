@@ -71,20 +71,42 @@ class PuzzleGame:
 
         if piece_id:
             self.selected_piece = piece_id[0]
-            self.offset_x = event.x - self.puzzle_canvas.coords(self.selected_piece)[0]
-            self.offset_y = event.y - self.puzzle_canvas.coords(self.selected_piece)[1]
+
+            # Store the initial mouse click position
+            self.start_x = event.x
+            self.start_y = event.y
 
     def on_drag(self, event):
         if self.selected_piece:
-            new_x = event.x - self.offset_x
-            new_y = event.y - self.offset_y
-            self.puzzle_canvas.coords(self.selected_piece, new_x -(self.square_width/2), new_y -(self.square_height/2))
+            # Calculate the distance moved since the initial click
+            delta_x = event.x - self.start_x
+            delta_y = event.y - self.start_y
+
+            # Update the coordinates of the selected piece to reflect the drag
+            self.puzzle_canvas.move(self.selected_piece, delta_x, delta_y)
+
+            # Update the initial mouse click position for the next drag event
+            self.start_x = event.x
+            self.start_y = event.y
 
     def on_release(self, event):
         if self.selected_piece:
+            # Calculate the closest grid location for the release position
+            new_x = event.x - self.offset_x
+            new_y = event.y - self.offset_y
+            grid_x = round(new_x / self.square_width) * self.square_width
+            grid_y = round(new_y / self.square_height) * self.square_height
+
+            # Snap the piece to the final grid location
+            self.puzzle_canvas.coords(self.selected_piece, grid_x, grid_y)
+
             self.selected_piece = None
             self.offset_x = 0
             self.offset_y = 0
+
+            # if self.is_puzzle_solved():
+            #     print("Congratulations! Puzzle Solved!")
+
 
 if __name__ == "__main__":
     root = CTk.CTk()
